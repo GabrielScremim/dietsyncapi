@@ -9,7 +9,7 @@ namespace dietsync.Controllers
 {
     [ApiController]
     [Route("api/treino")]
-    [Authorize] // Garante que só usuário autenticado acessa
+    // [Authorize] // Garante que só usuário autenticado acessa
     public class TreinoController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -137,27 +137,18 @@ namespace dietsync.Controllers
         }
 
         // ================= CLAIM USER ID =================
-        private ulong GetUserId()
+        private ulong? GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirst("sub");
 
             if (userIdClaim == null)
-                throw new Exception("Usuário não autenticado");
+                return null;
 
-            return ulong.Parse(userIdClaim.Value);
-        }
+            if (!ulong.TryParse(userIdClaim.Value, out var userId))
+                return null;
 
-        // ================= TESTE =================
-        [HttpGet("test-user")]
-        public IActionResult TestUser()
-        {
-            var userId = GetUserId();
-
-            return Ok(new
-            {
-                UserId = userId,
-                IsAuthenticated = User.Identity.IsAuthenticated
-            });
+            return userId;
         }
     }
 }

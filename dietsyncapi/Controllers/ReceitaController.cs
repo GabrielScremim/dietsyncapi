@@ -121,14 +121,18 @@ namespace dietsync.Controllers
 ;
         }
         // ================= CLAIM USER ID =================
-        private ulong GetUserId()
+         private ulong? GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirst("sub");
 
             if (userIdClaim == null)
-                throw new Exception("Usuário não autenticado");
+                return null;
 
-            return ulong.Parse(userIdClaim.Value);
+            if (!ulong.TryParse(userIdClaim.Value, out var userId))
+                return null;
+
+            return userId;
         }
     }
 }
