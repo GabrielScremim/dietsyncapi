@@ -1,5 +1,6 @@
 ﻿using dietsync.DTOs;
 using dietsync.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ namespace dietsync.Controllers
 {
     [ApiController]
     [Route("/api/receita")]
+    //[Authorize]
     public class ReceitaController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -86,6 +88,9 @@ namespace dietsync.Controllers
         public async Task<IActionResult> Update(ulong id, [FromBody] UpdateDto dto)
         {
             var userId = GetUserId();
+
+            if (userId == null)
+                return Unauthorized("Usuário não atualizado");
             var receita = await _context.Receita
             .FirstOrDefaultAsync(r => r.FkIdUserReceita == userId && r.IdReceitas == id);
 
