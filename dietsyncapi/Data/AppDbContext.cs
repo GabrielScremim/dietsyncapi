@@ -137,7 +137,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("cintura");
             entity.Property(e => e.Data).HasColumnName("data");
             entity.Property(e => e.FkIdEvolucaos).HasColumnName("fk_id_evolucaos");
-            entity.Property(e => e.FkIdUsuario).HasColumnName("fk_id_usuario");
+            // entity.Property(e => e.FkIdUsuario).HasColumnName("fk_id_usuario");
             entity.Property(e => e.Peso)
                 .HasColumnType("double(8,2)")
                 .HasColumnName("peso");

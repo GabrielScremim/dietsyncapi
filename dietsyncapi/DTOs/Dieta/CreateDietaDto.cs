@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.SignalR;
+
 namespace dietsync.DTOs
 {
     public class CreateDietaDto
@@ -13,5 +15,6 @@ namespace dietsync.DTOs
         public string Alimentos { get; set; }
         public int Quantidade { get; set; }
         public string Observacoes { get; set; }
+        public ulong FkIdUsuarioDieta { get; set;}
     }
 }

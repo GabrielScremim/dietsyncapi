@@ -19,7 +19,7 @@ public partial class Evolucao
 
     public ulong? FkIdEvolucaos { get; set; }
 
-    public long FkIdUsuario { get; set; }
+    // public long FkIdUsuario { get; set; }
 
     public virtual User FkIdEvolucaosNavigation { get; set; }
 }

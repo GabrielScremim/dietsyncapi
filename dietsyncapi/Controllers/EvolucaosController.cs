@@ -6,6 +6,9 @@ using System.Security.Claims;
 
 namespace dietsyncapi.Controllers
 {
+
+    [ApiController]
+    [Route("api/evolucao")]
     public class EvolucaosController : Controller
     {
         private readonly AppDbContext _context;
@@ -15,7 +18,7 @@ namespace dietsyncapi.Controllers
             _context = context;
         }
 
-        [HttpGet("/api/evolucao")]
+        [HttpGet]
         public async Task<ActionResult<List<ResponseEvolucaoDto>>> GetEvolucaos()
         {
             var UserId = GetUserId();
@@ -34,7 +37,7 @@ namespace dietsyncapi.Controllers
             return Ok(evolucaos);
         }
 
-        [HttpGet("/api/evolucao/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ResponseEvolucaoDto>> GetEvolucaoById(ulong id)
         {
             var UserId = GetUserId();
@@ -55,7 +58,7 @@ namespace dietsyncapi.Controllers
             return Ok(evolucao);
         }
 
-        [HttpPost("/api/evolucao")]
+        [HttpPost]
         public async Task<ActionResult<ResponseEvolucaoDto>> CreateEvolucao([FromBody] CreateEvolucaoDto dto)
         {
             var userId = GetUserId();
@@ -80,7 +83,7 @@ namespace dietsyncapi.Controllers
             return CreatedAtAction(nameof(GetEvolucaoById), new { id = evolucao.Id }, responseDto);
         }
 
-        [HttpPut("/api/evolucao/{id}")]
+        [HttpPut]
         public async Task<ActionResult<ResponseEvolucaoDto>> UpdateEvolucao(ulong id, [FromBody] UpdateEvolucaoDto dto)
         {
             var userId = GetUserId();
@@ -104,7 +107,7 @@ namespace dietsyncapi.Controllers
             return Ok(responseDto);
         }
 
-        [HttpDelete("/api/evolucao/{id}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteEvolucao(ulong id)
         {
             var userId = GetUserId();
