@@ -1,0 +1,34 @@
+﻿namespace dietsync.Domain.Entities;
+
+public class User
+{
+    public ulong Id { get; set; }
+
+    public string Name { get; set; }
+
+    public string Meta { get; set; }
+
+    public string Sexo { get; set; }
+
+    public DateOnly DataNasc { get; set; }
+
+    public double Peso { get; set; }
+
+    public double Altura { get; set; }
+
+    public string Email { get; set; }
+
+    public string Password { get; set; }
+
+    public string Sobrenome { get; set; }
+
+    public virtual ICollection<DadosSessao> DadosSessaos { get; set; } = new List<DadosSessao>();
+
+    public virtual ICollection<Dieta> Dieta { get; set; } = new List<Dieta>();
+
+    public virtual ICollection<Evolucao> Evolucaos { get; set; } = new List<Evolucao>();
+
+    public virtual ICollection<Receitum> Receita { get; set; } = new List<Receitum>();
+
+    public virtual ICollection<Treino> Treinos { get; set; } = new List<Treino>();
+}
