@@ -1,5 +1,6 @@
-﻿using dietsync.DTOs;
-using dietsync.Models;
+﻿using dietsync.Domain.Entities;
+using dietsync.DTOs;
+using dietsync.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,5 @@
-﻿using dietsync.Models;
+﻿using dietsync.Domain.Entities;
+using dietsync.Infrastructure.Data;
 using dietsyncapi.DTOs.Evolucao;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

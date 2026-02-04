@@ -1,12 +1,13 @@
-using dietsync.Applicattion.DTOs.User;
+using dietsync.DTOs;
 
 public interface IUserService
 {
-    Task<UserResponseDto> GetById(ulong id);
+    Task<UserDto> GetById(ulong id);
+    Task<UserDto> GetByEmail(string email);
 
-    Task Create(UserCreateDto dto);
+    Task Create(CreateUserRequestDTO dto);
 
-    Task Update(ulong id, UserUpdateDto dto);
+    Task Update(ulong id, UpdateUserDto dto);
 
     Task Delete(ulong id);
 }

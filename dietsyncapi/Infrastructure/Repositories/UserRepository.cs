@@ -1,5 +1,6 @@
 using dietsync.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using dietsync.Infrastructure.Data;
 
 public class UserRepository : IUserRepository
 {

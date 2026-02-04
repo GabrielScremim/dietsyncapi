@@ -1,5 +1,6 @@
-﻿using dietsync.DTOs;
-using dietsync.Models;
+﻿using dietsync.Domain.Entities;
+using dietsync.DTOs;
+using dietsync.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -56,7 +57,7 @@ namespace dietsync.Controllers
                 Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])
             );
 
-            var creds = new Microsoft.IdentityModel.Tokens.SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {

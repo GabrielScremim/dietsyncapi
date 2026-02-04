@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-
-namespace dietsync.Models;
+using dietsync.Domain.Entities;
+namespace dietsync.Infrastructure.Data;
 
 public partial class AppDbContext : DbContext
 {

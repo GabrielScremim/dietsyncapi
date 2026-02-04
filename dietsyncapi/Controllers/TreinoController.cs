@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using dietsync.DTOs;
-using dietsync.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using dietsync.Infrastructure.Data;
+using dietsync.DTOs;
+using dietsync.Domain.Entities;
 
 namespace dietsync.Controllers
 {

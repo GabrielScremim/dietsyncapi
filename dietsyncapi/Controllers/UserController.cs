@@ -18,7 +18,7 @@ namespace dietsync.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(UserCreateDto dto)
+        public async Task<IActionResult> Create(CreateUserRequestDTO dto)
         {
             await _service.Create(dto);
             return Ok(new { message = "Usuário criado com sucesso" });
@@ -31,8 +31,15 @@ namespace dietsync.Controllers
             return Ok(user);
         }
 
+        [HttpGet("email/{email}")]
+        public async Task<IActionResult> getByEmail(string email)
+        {
+            var user = await _service.GetByEmail(email);
+            return Ok(user);
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(ulong id, UserUpdateDto dto)
+        public async Task<IActionResult> Update(ulong id, UpdateUserDto dto)
         {
             await _service.Update(id, dto);
             return Ok(new { message = "Usuário atualizado" });
