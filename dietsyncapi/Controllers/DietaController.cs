@@ -1,6 +1,7 @@
 ﻿using dietsync.Domain.Entities;
 using dietsync.DTOs;
 using dietsync.Infrastructure.Data;
+using dietsyncapi.Application.Interfaces.IDieta;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,8 @@ namespace dietsync.Controllers
     [Authorize]
     public class DietaController : Controller
     {
-        private readonly AppDbContext _context;
-        public DietaController(AppDbContext context)
+        private readonly IDietaService _context;
+        public DietaController(IDietaService context)
         {
             _context = context;
         }
@@ -23,25 +24,7 @@ namespace dietsync.Controllers
         public async Task<ActionResult<List<ResponseDietaDto>>> GetAll()
         {
             var userId = GetUserId();
-
-            var dietas = await _context.Dietas
-            .Where(d => d.FkIdUsuarioDieta == userId)
-            .Select(d => new ResponseDietaDto
-            {
-                IdDieta = d.IdDieta,
-                NomeDieta = d.NomeDieta,
-                TipoDieta = d.TipoDieta,
-                Calorias = d.Calorias,
-                Proteinas = d.Proteinas,
-                Carboidratos = d.Carboidratos,
-                Gorduras = d.Gorduras,
-                DataDieta = d.DataDieta,
-                Refeicao = d.Refeicao,
-                Alimentos = d.Alimentos,
-                Quantidade = d.Quantidade,
-                Observacoes = d.Observacoes,
-            }).ToListAsync();
-
+            var dietas = await _context.GetAll(userId);
             return Ok(dietas);
         }
 
@@ -49,83 +32,24 @@ namespace dietsync.Controllers
         public async Task<ActionResult<ResponseDietaDto>> GetById(ulong id)
         {
             var userId = GetUserId();
-
-            var dieta = await _context.Dietas
-            .Where(d => d.FkIdUsuarioDieta == userId && d.IdDieta == id).
-            Select(d => new ResponseDietaDto
-            {
-                IdDieta = d.IdDieta,
-                NomeDieta = d.NomeDieta,
-                TipoDieta = d.TipoDieta,
-                Calorias = d.Calorias,
-                Proteinas = d.Proteinas,
-                Carboidratos = d.Carboidratos,
-                Gorduras = d.Gorduras,
-                DataDieta = d.DataDieta,
-                Refeicao = d.Refeicao,
-                Alimentos = d.Alimentos,
-                Quantidade = d.Quantidade,
-                Observacoes = d.Observacoes,
-            }).ToListAsync();
-
-            if (dieta == null)
-                return NotFound();
-
+            var dieta = await _context.GetById(userId, id);
             return Ok(dieta);
 
         }
 
         [HttpPost]
-        public async Task<ActionResult<CreateDietaDto>> Create([FromBody] CreateDietaDto dto)
+        public async Task<ActionResult> Create([FromBody] CreateDietaDto dto)
         {
             var userId = GetUserId();
-            var dieta = new Dieta
-            {
-                NomeDieta = dto.NomeDieta,
-                TipoDieta = dto.TipoDieta,
-                Calorias = dto.Calorias,
-                Proteinas = dto.Proteinas,
-                Carboidratos = dto.Carboidratos,
-                Gorduras = dto.Gorduras,
-                DataDieta = dto.DataDieta,
-                Refeicao = dto.Refeicao,
-                Alimentos = dto.Alimentos,
-                Quantidade = dto.Quantidade,
-                Observacoes = dto.Observacoes,
-                FkIdUsuarioDieta = dto.FkIdUsuarioDieta,
-            };
-
-            _context.Dietas.Add(dieta);
-            await _context.SaveChangesAsync();
-
+            var dieta = await _context.Create(userId, dto);
             return CreatedAtAction(nameof(GetById), new { id = dieta.IdDieta }, null);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<UpdateDietaDto>> Update(ulong id, [FromBody] UpdateDietaDto dto)
+        public async Task<ActionResult> Update(ulong id, [FromBody] UpdateDietaDto dto)
         {
             var userId = GetUserId();
-
-            var dieta = await _context.Dietas
-            .FirstOrDefaultAsync(d => d.IdDieta == id && d.FkIdUsuarioDieta == userId);
-
-            if (dieta == null)
-                return NotFound();
-
-            dieta.NomeDieta = dto.NomeDieta;
-            dieta.TipoDieta = dto.TipoDieta;
-            dieta.Calorias = dto.Calorias;
-            dieta.Proteinas = dto.Proteinas;
-            dieta.Carboidratos = dto.Carboidratos;
-            dieta.Gorduras = dto.Gorduras;
-            dieta.DataDieta = dto.DataDieta;
-            dieta.Refeicao = dto.Refeicao;
-            dieta.Alimentos = dto.Alimentos;
-            dieta.Quantidade = dto.Quantidade;
-            dieta.Observacoes = dto.Observacoes;
-
-            await _context.SaveChangesAsync();
-
+            await _context.Update(userId, id, dto);
             return NoContent();
         }
 
@@ -133,16 +57,8 @@ namespace dietsync.Controllers
         public async Task<IActionResult> Delete(ulong id)
         {
             var userId = GetUserId();
-
-            var dieta = await _context.Dietas.FirstOrDefaultAsync(d => d.FkIdUsuarioDieta == userId && d.IdDieta == id);
-
-            if (dieta == null)
-                return NotFound();
-
-            _context.Dietas.Remove(dieta);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            await _context.Delete(id, userId);
+            return Ok(new { message = "Dieta removida" });
         }
         private ulong GetUserId()
         {

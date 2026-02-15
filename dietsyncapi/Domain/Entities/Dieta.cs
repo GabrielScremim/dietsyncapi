@@ -16,7 +16,7 @@ public class Dieta
 
     public double Gorduras { get; set; }
 
-    public string DataDieta { get; set; }
+    public DateTime DataDieta { get; set; }
 
     public string Refeicao { get; set; }
 

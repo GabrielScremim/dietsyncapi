@@ -1,4 +1,7 @@
 using dietsync.Infrastructure.Data;
+using dietsyncapi.Application.Interfaces.IDieta;
+using dietsyncapi.Application.Services;
+using dietsyncapi.Infrastructure.Repositories.DietaRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -43,8 +46,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//injeção de dependência
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDietaService, DietaService>();
+builder.Services.AddScoped<IDietaRepository, DietaRepository>();
 
 var app = builder.Build();
 
