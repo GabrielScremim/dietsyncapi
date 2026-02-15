@@ -50,7 +50,7 @@ namespace dietsyncapi.Application.Services
 
         public async Task Delete(ulong userId, ulong id)
         {
-            var dieta = await _repo.GetByIdAsync(id);
+            var dieta = await _repo.GetByIdAsync(id, userId);
             if (dieta == null)
                 throw new Exception("Dieta não encontrada");
             await _repo.DeleteAsync(dieta);
@@ -78,7 +78,7 @@ namespace dietsyncapi.Application.Services
 
         public async Task<ResponseDietaDto> GetById(ulong userId, ulong id)
         {
-            var dieta = await _repo.GetByIdAsync(id);
+            var dieta = await _repo.GetByIdAsync(id, userId);
 
             if (dieta == null)
                 throw new Exception("Dieta não encontrada");
@@ -102,7 +102,7 @@ namespace dietsyncapi.Application.Services
 
         public async Task Update(ulong userId, ulong id, UpdateDietaDto dto)
         {
-            var dieta = await _repo.GetByIdAsync(id);
+            var dieta = await _repo.GetByIdAsync(id, userId);
 
             if (dieta == null)
                 throw new Exception("Dieta não encontrada");

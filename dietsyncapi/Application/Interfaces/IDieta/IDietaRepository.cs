@@ -5,7 +5,7 @@ namespace dietsyncapi.Application.Interfaces.IDieta
 {
     public interface IDietaRepository
     {
-        Task<Dieta> GetByIdAsync(ulong id);
+        Task<Dieta> GetByIdAsync(ulong id, ulong userId);
         Task<List<Dieta>> GetAllByUserIdAsync(ulong userId);
         Task<Dieta> CreateAsync(Dieta dieta);
         Task<Dieta> UpdateAsync(Dieta dieta);
