@@ -52,7 +52,7 @@ namespace dietsyncapi.Application.Services
         {
             var dieta = await _repo.GetByIdAsync(id, userId);
             if (dieta == null)
-                throw new Exception("Dieta não encontrada");
+                throw new KeyNotFoundException("Dieta não encontrada");
             await _repo.DeleteAsync(dieta);
         }
 

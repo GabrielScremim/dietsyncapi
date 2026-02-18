@@ -18,20 +18,6 @@ namespace dietsyncapi.Infrastructure.Repositories.DietaRepository
         {
             await _context.Dietas.AddAsync(dieta);
             await _context.SaveChangesAsync();
-            var createdDieta = new CreateDietaDto
-            {
-                NomeDieta = dieta.NomeDieta,
-                TipoDieta = dieta.TipoDieta,
-                Calorias = dieta.Calorias,
-                Proteinas = dieta.Proteinas,
-                Carboidratos = dieta.Carboidratos,
-                Gorduras = dieta.Gorduras,
-                DataDieta = dieta.DataDieta,
-                Refeicao = dieta.Refeicao,
-                Alimentos = dieta.Alimentos,
-                Quantidade = dieta.Quantidade,
-                Observacoes = dieta.Observacoes
-            };
             return dieta;
         }
 
