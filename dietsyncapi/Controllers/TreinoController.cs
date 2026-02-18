@@ -1,147 +1,116 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using dietsync.Infrastructure.Data;
 using dietsync.DTOs;
-using dietsync.Domain.Entities;
 
-namespace dietsync.Controllers
+namespace dietsync.API.Controllers
 {
     [ApiController]
     [Route("api/treino")]
-    // [Authorize] // Garante que só usuário autenticado acessa
+    [Authorize] // Ative quando estiver usando autenticação
     public class TreinoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ITreinoService _service;
 
-        public TreinoController(AppDbContext context)
+        public TreinoController(ITreinoService service)
         {
-            _context = context;
+            _service = service;
         }
 
+        // =========================
+        // GET ALL
+        // =========================
         [HttpGet]
         public async Task<ActionResult<List<TreinoResponseDTO>>> GetAll()
         {
             var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
 
-            var treinos = await _context.Treinos
-                .Where(t => t.FkIdUsuarioTreino == userId)
-                .Select(t => new TreinoResponseDTO
-                {
-                    Data = t.Data,
-                    Tipo = t.Tipo,
-                    Exercicios = t.Exercicios,
-                    Repeticoes = t.Repeticoes,
-                    Series = t.Series,
-                    Objetivo = t.Objetivo,
-                    Duracao = t.Duracao,
-                    Frequencia = t.Frequencia,
-                    NomeTreino = t.NomeTreino,
-                })
-                .ToListAsync();
+            var result = await _service.GetAllAsync(userId.Value);
 
-            return Ok(treinos);
+            return Ok(result);
         }
 
+        // =========================
+        // GET BY ID
+        // =========================
         [HttpGet("{id}")]
-        public async Task<ActionResult<List<TreinoResponseDTO>>> GetById(ulong id)
+        public async Task<ActionResult<TreinoResponseDTO>> GetById(ulong id)
         {
             var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
 
-            var treino = await _context.Treinos
-             .Where(t => t.Id == id && t.FkIdUsuarioTreino == userId)
-                .Select(t => new TreinoResponseDTO
-                {
-                    Data = t.Data,
-                    Tipo = t.Tipo,
-                    Exercicios = t.Exercicios,
-                    Repeticoes = t.Repeticoes,
-                    Series = t.Series,
-                    Objetivo = t.Objetivo,
-                    Duracao = t.Duracao,
-                    Frequencia = t.Frequencia,
-                    NomeTreino = t.NomeTreino,
-                })
-                .FirstOrDefaultAsync();
+            var result = await _service.GetByIdAsync(id, userId.Value);
 
-            return Ok(treino);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateTreinoDTO dto)
-        {
-            var userId = GetUserId();
-            var treino = new Treino
-            {
-                Data = dto.Data,
-                Tipo = dto.Tipo,
-                Exercicios = dto.Exercicios,
-                Repeticoes = dto.Repeticoes,
-                Series = dto.Series,
-                Objetivo = dto.Objetivo,
-                Duracao = dto.Duracao,
-                Frequencia = dto.Frequencia,
-                NomeTreino = dto.NomeTreino,
-                DiaTreino = dto.DiaTreino,
-                FkIdUsuarioTreino = userId
-            };
-
-            _context.Treinos.Add(treino);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = treino.Id }, null);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(ulong id, [FromBody] UpdateTreinoDto dto)
-        {
-            var userId = GetUserId();
-
-            var treino = await _context.Treinos.
-            FirstOrDefaultAsync(t => t.Id == id && t.FkIdUsuarioTreino == userId);
-
-            if (treino == null)
+            if (result == null)
                 return NotFound("Treino não encontrado");
 
-            treino.Data = dto.Data;
-            treino.Tipo = dto.Tipo;
-            treino.Exercicios = dto.Exercicios;
-            treino.Repeticoes = dto.Repeticoes;
-            treino.Series = dto.Series;
-            treino.Objetivo = dto.Objetivo;
-            treino.Duracao = dto.Duracao;
-            treino.Frequencia = dto.Frequencia;
-            treino.NomeTreino = dto.NomeTreino;
-            treino.DiaTreino = dto.DiaTreino;
+            return Ok(result);
+        }
 
-            await _context.SaveChangesAsync();
+        // =========================
+        // CREATE
+        // =========================
+        [HttpPost]
+        public async Task<ActionResult<TreinoResponseDTO>> Create(CreateTreinoDTO dto)
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
+
+            var result = await _service.CreateAsync(dto, userId.Value);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        // =========================
+        // UPDATE
+        // =========================
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(
+            ulong id,
+            [FromBody] UpdateTreinoDto dto)
+        {
+            var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
+
+            var success = await _service.UpdateAsync(id, dto, userId.Value);
+
+            if (!success)
+                return NotFound("Treino não encontrado");
 
             return NoContent();
         }
 
+        // =========================
+        // DELETE
+        // =========================
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(ulong id)
         {
             var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
 
-            var treino = await _context.Treinos.
-            FirstOrDefaultAsync(t => t.Id == id && t.FkIdUsuarioTreino == userId);
+            var success = await _service.DeleteAsync(id, userId.Value);
 
-            if (treino == null)
-                return NotFound();
-
-            _context.Treinos.Remove(treino);
-            await _context.SaveChangesAsync();
+            if (!success)
+                return NotFound("Treino não encontrado");
 
             return NoContent();
         }
 
-        // ================= CLAIM USER ID =================
+        // =========================
+        // CLAIM USER ID
+        // =========================
         private ulong? GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)
-                           ?? User.FindFirst("sub");
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
 
             if (userIdClaim == null)
                 return null;

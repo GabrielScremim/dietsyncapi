@@ -1,4 +1,6 @@
+using dietsync.Application.Services;
 using dietsync.Infrastructure.Data;
+using dietsync.Infrastructure.Repositories;
 using dietsyncapi.Application.Interfaces.IDieta;
 using dietsyncapi.Application.Services;
 using dietsyncapi.Infrastructure.Repositories.DietaRepository;
@@ -46,11 +48,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//injeção de dependência
+//injeï¿½ï¿½o de dependï¿½ncia
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDietaService, DietaService>();
 builder.Services.AddScoped<IDietaRepository, DietaRepository>();
+builder.Services.AddScoped<ITreinoRepository, TreinoRepository>();
+builder.Services.AddScoped<ITreinoService, TreinoService>();
 
 var app = builder.Build();
 
