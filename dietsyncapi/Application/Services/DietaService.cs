@@ -48,7 +48,7 @@ namespace dietsyncapi.Application.Services
             };
         }
 
-        public async Task Delete(ulong userId, ulong id)
+        public async Task Delete(ulong id, ulong userId)
         {
             var dieta = await _repo.GetByIdAsync(id, userId);
             if (dieta == null)

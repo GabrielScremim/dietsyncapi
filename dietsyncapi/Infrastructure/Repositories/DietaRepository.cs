@@ -33,7 +33,7 @@ namespace dietsyncapi.Infrastructure.Repositories.DietaRepository
 
         }
 
-        public Task<Dieta> GetByIdAsync(ulong id, ulong userId)
+        public Task<Dieta?> GetByIdAsync(ulong id, ulong userId)
         {
             return _context.Dietas
                 .FirstOrDefaultAsync(d => d.IdDieta == id && d.FkIdUsuarioDieta == userId);
