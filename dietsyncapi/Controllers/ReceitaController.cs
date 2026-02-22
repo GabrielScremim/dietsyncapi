@@ -1,6 +1,8 @@
 ﻿using dietsync.Domain.Entities;
+using dietsync.Domain.Interfaces;
 using dietsync.DTOs;
 using dietsync.Infrastructure.Data;
+using dietsync.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,56 +12,34 @@ namespace dietsync.Controllers
 {
     [ApiController]
     [Route("/api/receita")]
-    //[Authorize]
+    [Authorize]
     public class ReceitaController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IReceitaService _service;
 
-        public ReceitaController(AppDbContext context)
+        public ReceitaController(IReceitaService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ResponseReceitaDto>>> GetAll()
         {
             var userId = GetUserId();
+            if (userId == null) return Unauthorized();
 
-            var receitas = await _context.Receita
-            .Where(r => r.FkIdUserReceita == userId)
-            .Select(r => new ResponseReceitaDto
-            {
-                IdReceitas = r.IdReceitas,
-                NomeReceita = r.NomeReceita,
-                Ingredientes = r.Ingredientes,
-                ModoPreparo = r.ModoPreparo,
-                Calorias = r.Calorias,
-                Proteinas = r.Proteinas,
-                Carboidratos = r.Carboidratos,
-                Gordura = r.Gordura,
-            }).ToListAsync();
-
+            var receitas = await _service.GetAll(userId.Value);
             return Ok(receitas);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<List<ResponseReceitaDto>>> GetById(ulong id)
         {
-            var UserId = GetUserId();
+            var userId = GetUserId();
+            if (userId == null) return Unauthorized();
 
-            var receita = await _context.Receita
-            .Where(r => r.FkIdUserReceita == UserId && r.IdReceitas == id)
-            .Select(r => new ResponseReceitaDto
-            {
-                IdReceitas = r.IdReceitas,
-                NomeReceita = r.NomeReceita,
-                Ingredientes = r.Ingredientes,
-                ModoPreparo = r.ModoPreparo,
-                Calorias = r.Calorias,
-                Proteinas = r.Proteinas,
-                Carboidratos = r.Carboidratos,
-                Gordura = r.Gordura,
-            }).FirstOrDefaultAsync();
+            var receita = await _service.GetById(userId.Value, id);
+            if (receita == null) return NotFound();
 
             return Ok(receita);
         }
@@ -68,21 +48,11 @@ namespace dietsync.Controllers
         public async Task<IActionResult> Create([FromBody] CreateReceitaDto dto)
         {
             var userId = GetUserId();
-            var receita = new Receitum
-            {
-                NomeReceita = dto.NomeReceita,
-                Ingredientes = dto.Ingredientes,
-                ModoPreparo = dto.ModoPreparo,
-                Calorias = dto.Calorias,
-                Proteinas = dto.Proteinas,
-                Carboidratos = dto.Carboidratos,
-                Gordura = dto.Gordura,
-                FkIdUserReceita = userId,
-            };
-            _context.Receita.Add(receita);
-            await _context.SaveChangesAsync();
+            if (userId == null) return Unauthorized();
 
-            return CreatedAtAction(nameof(GetById), new { id = receita.IdReceitas }, null);
+            var id = await _service.Create(userId.Value, dto);
+
+            return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
         [HttpPut("{id}")]
@@ -90,23 +60,10 @@ namespace dietsync.Controllers
         {
             var userId = GetUserId();
 
-            if (userId == null)
-                return Unauthorized("Usuário não atualizado");
-            var receita = await _context.Receita
-            .FirstOrDefaultAsync(r => r.FkIdUserReceita == userId && r.IdReceitas == id);
+            if (userId == null) return Unauthorized();
 
-            if (receita == null)
-                return NotFound();
-
-            receita.NomeReceita = dto.NomeReceita;
-            receita.Ingredientes = dto.Ingredientes;
-            receita.ModoPreparo = dto.ModoPreparo;
-            receita.Calorias = dto.Calorias;
-            receita.Proteinas = dto.Proteinas;
-            receita.Carboidratos = dto.Carboidratos;
-            receita.Gordura = dto.Gordura;
-
-            await _context.SaveChangesAsync();
+            var updated = await _service.Update(userId.Value, id, dto);
+            if (updated == null) return NotFound();
 
             return NoContent();
         }
@@ -115,22 +72,19 @@ namespace dietsync.Controllers
         public async Task<IActionResult> Delete(ulong id)
         {
             var userId = GetUserId();
-            var receita = await _context.Receita.FirstOrDefaultAsync(r => r.FkIdUserReceita == userId && r.IdReceitas == id);
+            if (userId == null) return Unauthorized();
 
-            if (receita == null)
-                return NotFound();
+            var deleted = await _service.DeleteAsync(userId.Value, id);
+            if (!deleted) return NotFound();
 
-            _context.Receita.Remove(receita);
-
-            await _context.SaveChangesAsync();
-            return NoContent()
-;
+            return NoContent();
         }
         // ================= CLAIM USER ID =================
-         private ulong? GetUserId()
+        private ulong? GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)
-                           ?? User.FindFirst("sub");
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
 
             if (userIdClaim == null)
                 return null;
