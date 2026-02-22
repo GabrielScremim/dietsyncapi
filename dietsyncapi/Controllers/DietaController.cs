@@ -24,7 +24,9 @@ namespace dietsync.Controllers
         public async Task<ActionResult<List<ResponseDietaDto>>> GetAll()
         {
             var userId = GetUserId();
-            var dietas = await _context.GetAll(userId);
+            if (userId == null)
+                return Unauthorized();
+            var dietas = await _context.GetAll(userId.Value);
             return Ok(dietas);
         }
 
@@ -32,7 +34,9 @@ namespace dietsync.Controllers
         public async Task<ActionResult<ResponseDietaDto>> GetById(ulong id)
         {
             var userId = GetUserId();
-            var dieta = await _context.GetById(userId, id);
+            if (userId == null)
+                return Unauthorized();
+            var dieta = await _context.GetById(userId.Value, id);
             return Ok(dieta);
 
         }
@@ -41,7 +45,9 @@ namespace dietsync.Controllers
         public async Task<ActionResult> Create([FromBody] CreateDietaDto dto)
         {
             var userId = GetUserId();
-            var dieta = await _context.Create(userId, dto);
+            if (userId == null)
+                return Unauthorized();
+            var dieta = await _context.Create(userId.Value, dto);
             return CreatedAtAction(nameof(GetById), new { id = dieta.IdDieta }, null);
         }
 
@@ -49,7 +55,9 @@ namespace dietsync.Controllers
         public async Task<ActionResult> Update(ulong id, [FromBody] UpdateDietaDto dto)
         {
             var userId = GetUserId();
-            await _context.Update(userId, id, dto);
+            if (userId == null)
+                return Unauthorized();
+            await _context.Update(userId.Value, id, dto);
             return NoContent();
         }
 
@@ -57,17 +65,24 @@ namespace dietsync.Controllers
         public async Task<IActionResult> Delete(ulong id)
         {
             var userId = GetUserId();
-            await _context.Delete(id, userId);
+            if (userId == null)
+                return Unauthorized();
+            await _context.Delete(id, userId.Value);
             return Ok(new { message = "Dieta removida" });
         }
-        private ulong GetUserId()
+        private ulong? GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
 
             if (userIdClaim == null)
-                throw new Exception("Usuário não autenticado");
+                return null;
 
-            return ulong.Parse(userIdClaim.Value);
+            if (!ulong.TryParse(userIdClaim.Value, out var userId))
+                return null;
+
+            return userId;
         }
     }
 }
