@@ -3,7 +3,7 @@
     public class ResponseEvolucaoDto
     {
         public ulong Id { get; set; }
-        public DateOnly Data { get; set; }
+        public DateTime Data { get; set; }
 
         public double Peso { get; set; }
 

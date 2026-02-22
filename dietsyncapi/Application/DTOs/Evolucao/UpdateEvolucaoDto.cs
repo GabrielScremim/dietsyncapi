@@ -2,7 +2,7 @@
 {
     public class UpdateEvolucaoDto
     {
-        public DateOnly Data { get; set; }
+        public DateTime Data { get; set; }
 
         public double Peso { get; set; }
 
