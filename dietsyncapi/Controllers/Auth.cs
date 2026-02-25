@@ -26,30 +26,43 @@ namespace dietsync.Controllers
         {
             var user = _context.Users
                 .FirstOrDefault(u => u.Email == userLogin.Email);
+
             if (user == null)
             {
-                new AuthErrorDto
+                return Unauthorized(new
                 {
-                    Message = "Email ou senha inválidos.",
-                    Success = false,
-                    Data = new LoginResponseDto
-                    {
-                        Email = user.Email,
-                        Name = user.Name
-                    }
-                };
+                    message = "Email ou senha inválidos."
+                });
             }
+
             bool senhaOk = BCrypt.Net.BCrypt.Verify(userLogin.Password, user.Password);
 
             if (!senhaOk)
             {
-                return Unauthorized(new { message = "Email ou senha inválidos." });
+                return Unauthorized(new
+                {
+                    message = "Email ou senha inválidos."
+                });
             }
-            var token = GenerateJwtToken(user);
 
-            return Ok(token);
+            var loginResponse = GenerateJwtToken(user);
+            var token = loginResponse.Token;
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // true em produção com HTTPS
+                SameSite = SameSiteMode.Lax, // None só se for HTTPS
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            Response.Cookies.Append("auth_token", token, cookieOptions);
+
+            return Ok(new
+            {
+                message = "Login realizado com sucesso"
+            });
         }
-
         private LoginResponseDto GenerateJwtToken(User user)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
